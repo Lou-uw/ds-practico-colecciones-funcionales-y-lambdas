@@ -16,7 +16,7 @@ class Ejercicio1MapFilterTest {
     @Nested
     @DisplayName("Parte A: Operaciones con Map")
     inner class MapOperations {
-        
+
         @Test
         @DisplayName("Debe obtener una lista con solo los nombres de los productos")
         fun obtenerNombresDeProductos() {
