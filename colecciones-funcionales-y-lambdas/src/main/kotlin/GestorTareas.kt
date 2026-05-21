@@ -26,58 +26,59 @@ class GestorTareas {
     // Parte A: Operaciones con Find
 
     fun encontrarPrimeraTareaUrgente(tareas: List<Tarea>): Tarea? {
-        TODO("Implementar: Debe encontrar la primera tarea con prioridad 3")
+        return tareas.find {it.prioridad == 3 }
     }
 
     fun buscarPorId(
         tareas: List<Tarea>,
         id: Int,
     ): Tarea? {
-        TODO("Implementar: Debe encontrar la tarea con el ID especificado")
+        return tareas.find {it.id == id}
     }
 
     fun encontrarTareaPendienteConEtiqueta(
         tareas: List<Tarea>,
         etiqueta: String,
     ): Tarea? {
-        TODO("Implementar: Debe encontrar la primera tarea no completada con la etiqueta especificada")
+        return tareas.find {it.completada == false}
+            tareas.find {it.etiquetas.toString() == etiqueta}
     }
 
     // Parte B: Operaciones con Any
 
     fun hayTareasUrgentesPendientes(tareas: List<Tarea>): Boolean {
-        TODO("Implementar: Debe verificar si hay alguna tarea urgente (prioridad 3) sin completar")
+        return tareas.any {it.prioridad == 3 && it.completada == false}
     }
 
     fun hayTareasQueSuperanHoras(
         tareas: List<Tarea>,
         horasLimite: Int,
     ): Boolean {
-        TODO("Implementar: Debe verificar si alguna tarea supera el límite de horas especificado")
+        return tareas.any {it.tiempoEstimadoHoras > horasLimite}
     }
 
     fun existeTareaConEtiqueta(
         tareas: List<Tarea>,
         etiqueta: String,
     ): Boolean {
-        TODO("Implementar: Debe verificar si existe alguna tarea con la etiqueta especificada")
+        return tareas.any {etiqueta in it.etiquetas}
     }
 
     // Parte C: Operaciones con All
 
     fun todasCompletadas(tareas: List<Tarea>): Boolean {
-        TODO("Implementar: Debe verificar si todas las tareas están completadas")
+        return tareas.all{it.completada == true}
     }
 
     fun todasTienenEtiquetas(tareas: List<Tarea>): Boolean {
-        TODO("Implementar: Debe verificar si todas las tareas tienen al menos una etiqueta")
+        return tareas.all {it.etiquetas == null}
     }
 
     fun todasDentroDeHoras(
         tareas: List<Tarea>,
         horasMaximo: Int,
     ): Boolean {
-        TODO("Implementar: Debe verificar si todas las tareas están dentro del límite de horas")
+        return tareas.all {it.tiempoEstimadoHoras <= horasMaximo}
     }
 
     // Parte D: Combinación de Find, Any y All
