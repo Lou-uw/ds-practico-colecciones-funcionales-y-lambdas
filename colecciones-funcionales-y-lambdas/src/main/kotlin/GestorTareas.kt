@@ -84,24 +84,26 @@ class GestorTareas {
     // Parte D: Combinación de Find, Any y All
 
     fun proyectoListoParaEntrega(tareas: List<Tarea>): Boolean {
-        TODO(
-            """
-            Implementar: Un proyecto está listo si:
-            - Todas las tareas de prioridad alta (3) están completadas
-            - No hay ninguna tarea pendiente con etiqueta "blocker"
-            - Existe al menos una tarea de documentación completada
-        """,
-        )
-    }
+            return tareas.all {it.prioridad != 3 || it.completada}
+                  !tareas.any {"blocker" in it.etiquetas && !it.completada }
+                   tareas.find {it.titulo == "Documentación" && it.completada == true} != null
+        }
 
     fun generarResumenEstado(tareas: List<Tarea>): EstadoProyecto {
-        TODO(
-            """
-            Implementar: Debe generar un resumen con:
-            - hayTareasCriticasPendientes: si hay tareas de prioridad 3 sin completar
-            - totalHorasPendientes: suma de horas de tareas no completadas
-            - todosLosBugsResueltos: si todas las tareas con etiqueta "bug" están completadas
-        """,
+        val hayTareasCriticasPendientes = tareas.any {it.prioridad == 3 && !it.completada}
+
+        var totalHorasPendientes = 0
+        for (tarea in tareas) {
+            if (!tarea.completada) {
+                totalHorasPendientes += tarea.tiempoEstimadoHoras
+            }
+        }
+        val todosLosBugsResueltos = tareas.all {"bug" !in it.etiquetas || it.completada}
+
+        return EstadoProyecto(
+            hayTareasCriticasPendientes,
+            totalHorasPendientes,
+            todosLosBugsResueltos
         )
     }
 }
