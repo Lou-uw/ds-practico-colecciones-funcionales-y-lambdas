@@ -150,6 +150,7 @@ class Ejercicio4FuncionesComoArgumentosTest {
             assertEquals(350.0, totalMontos)
             assertEquals(3, cantidadProcesadas)
         }
+
         
         @Test
         @DisplayName("Debe calcular balance con función de agregación")

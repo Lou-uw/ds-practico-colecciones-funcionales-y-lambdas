@@ -33,14 +33,14 @@ class ProcesadorTransacciones {
         transacciones: List<Transaccion>,
         transformacion: (Double) -> Double,
     ): List<Double> {
-        TODO("Implementar: Debe aplicar la función de transformación a cada monto")
+        return transacciones.map {transaccion -> transformacion(transaccion.monto)}
     }
 
     fun <T> procesarCon(
         transacciones: List<Transaccion>,
         procesador: (Transaccion) -> T,
     ): List<T> {
-        TODO("Implementar: Debe procesar cada transacción con la función dada")
+        return transacciones.map{transaccion -> procesador(transaccion)}
     }
 
     // Parte B: Funciones de Filtrado como Parámetros
@@ -49,14 +49,15 @@ class ProcesadorTransacciones {
         transacciones: List<Transaccion>,
         predicado: (Transaccion) -> Boolean,
     ): List<Transaccion> {
-        TODO("Implementar: Debe filtrar transacciones usando el predicado")
+        return transacciones.filter{predicado(it)}
     }
 
     fun filtrarConMultiplesCriterios(
         transacciones: List<Transaccion>,
         criterios: List<(Transaccion) -> Boolean>,
     ): List<Transaccion> {
-        TODO("Implementar: Debe filtrar transacciones que cumplan TODOS los criterios")
+        return transacciones.filter{ transaccion ->
+            criterios.all{criterio -> criterio(transaccion)}}
     }
 
     // Parte C: Funciones de Agregación como Parámetros
@@ -66,7 +67,14 @@ class ProcesadorTransacciones {
         valorInicial: T,
         agregador: (T, Transaccion) -> T,
     ): T {
-        TODO("Implementar: Debe agregar valores usando la función agregadora")
+
+        var agrega = valorInicial
+
+        for (transaccion in transacciones) {
+            agrega = agregador(agrega, transaccion)
+        }
+
+        return agrega
     }
 
     // Parte D: Composición de Funciones
@@ -78,29 +86,19 @@ class ProcesadorTransacciones {
         transformacion: (Transaccion) -> Double,
         agregacion: (Double, Double) -> Double,
     ): Double {
-        TODO(
-            """
-            Implementar pipeline:
-            1) Aplicar filtro1
-            2) Aplicar filtro2
-            3) Transformar cada transacción a Double
-            4) Agregar todos los valores con la función de agregación (inicial: 0.0)
-        """,
-        )
+        return transacciones.filter(filtro1)
+            .filter(filtro2)
+            .map(transformacion)
+            .fold(0.0, agregacion)
     }
 
     fun procesarConConfiguracion(
         transacciones: List<Transaccion>,
         config: ConfiguracionProcesamiento,
     ): List<String> {
-        TODO(
-            """
-            Implementar:
-            1) Filtrar usando config.filtro
-            2) Transformar usando config.transformacion
-            3) Formatear usando config.formateo
-        """,
-        )
+        return transacciones.filter(config.filtro)
+            .map(config.transformacion)
+            .map(config.formateo)
     }
 
     fun procesarConEventos(
