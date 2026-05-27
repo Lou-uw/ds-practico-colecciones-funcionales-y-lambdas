@@ -33,14 +33,14 @@ class ProcesadorTransacciones {
         transacciones: List<Transaccion>,
         transformacion: (Double) -> Double,
     ): List<Double> {
-        return transacciones.map {transaccion -> transformacion(transaccion.monto)}
+        return transacciones.map { transaccion -> transformacion(transaccion.monto) }
     }
 
     fun <T> procesarCon(
         transacciones: List<Transaccion>,
         procesador: (Transaccion) -> T,
     ): List<T> {
-        return transacciones.map{transaccion -> procesador(transaccion)}
+        return transacciones.map { transaccion -> procesador(transaccion) }
     }
 
     // Parte B: Funciones de Filtrado como Parámetros
@@ -49,15 +49,16 @@ class ProcesadorTransacciones {
         transacciones: List<Transaccion>,
         predicado: (Transaccion) -> Boolean,
     ): List<Transaccion> {
-        return transacciones.filter{predicado(it)}
+        return transacciones.filter { predicado(it) }
     }
 
     fun filtrarConMultiplesCriterios(
         transacciones: List<Transaccion>,
         criterios: List<(Transaccion) -> Boolean>,
     ): List<Transaccion> {
-        return transacciones.filter{ transaccion ->
-            criterios.all{criterio -> criterio(transaccion)}}
+        return transacciones.filter { transaccion ->
+            criterios.all { criterio -> criterio(transaccion) }
+        }
     }
 
     // Parte C: Funciones de Agregación como Parámetros
@@ -106,13 +107,14 @@ class ProcesadorTransacciones {
         onTransaccionProcesada: (Transaccion) -> Unit,
         onTransaccionRechazada: (Transaccion) -> Unit,
     ) {
-        TODO(
-            """
-            Implementar:
-            - Para transacciones PROCESADAS: ejecutar onTransaccionProcesada
-            - Para transacciones RECHAZADAS: ejecutar onTransaccionRechazada
-        """,
-        )
+        transacciones.forEach { transacciones ->
+            if (transacciones.estado == EstadoTransaccion.PROCESADA) {
+                onTransaccionProcesada(transacciones)
+            } else if (transacciones.estado == EstadoTransaccion.RECHAZADA) {
+                onTransaccionRechazada(transacciones)
+            }
+        }
+
     }
 }
 

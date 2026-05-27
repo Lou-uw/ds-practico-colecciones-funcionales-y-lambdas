@@ -34,10 +34,12 @@ class UsuarioBuilder {
     // Parte A: Uso del parámetro implícito 'it'
 
     fun procesarNumeros(numeros: List<Int>): List<Int> {
-        TODO("Implementar: Filtrar números pares y multiplicarlos por 10, usando 'it'")
+        return numeros.filter{it % 2 == 0}
+            .map {it * 10}
     }
 
     fun validarUsuarios(usuarios: List<Usuario>): List<List<Validacion>> {
+
         TODO(
             """
             Implementar validación de usuarios usando 'it':

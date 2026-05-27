@@ -86,7 +86,7 @@ class GestorTareas {
     fun proyectoListoParaEntrega(tareas: List<Tarea>): Boolean {
             return tareas.all {it.prioridad != 3 || it.completada}
                   !tareas.any {"blocker" in it.etiquetas && !it.completada }
-                   tareas.find {it.titulo == "Documentación" && it.completada == true} != null
+                   tareas.find {it.titulo == "Documentación" && it.completada == true}
         }
 
     fun generarResumenEstado(tareas: List<Tarea>): EstadoProyecto {

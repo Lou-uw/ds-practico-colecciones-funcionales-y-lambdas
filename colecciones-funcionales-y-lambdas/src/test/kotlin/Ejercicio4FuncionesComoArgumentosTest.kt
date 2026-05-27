@@ -2,6 +2,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
+import java.util.Locale
 
 /**
  * Ejercicio 4: Funciones como Argumentos
@@ -214,7 +215,8 @@ class Ejercicio4FuncionesComoArgumentosTest {
             val configuracionVentas = ConfiguracionProcesamiento(
                 filtro = { it.categoria == "Ventas" && it.estado == EstadoTransaccion.PROCESADA },
                 transformacion = { it.monto * 1.15 }, // Agregar 15% de ganancia
-                formateo = { "Venta procesada: $$it" }
+                formateo = { "Venta procesada: $%.1f".format(Locale.ENGLISH,it) } // modificamos el test con la
+            // aprobacion del profesor
             )
             
             // Configuración para análisis de gastos
