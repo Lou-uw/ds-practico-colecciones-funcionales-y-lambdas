@@ -14,7 +14,7 @@ data class Usuario(
     var email: String = "",
     var activo: Boolean = false,
     var roles: MutableList<String> = mutableListOf(),
-    var configuracion: ConfiguracionUsuario = ConfiguracionUsuario(),
+    var configuracion: ConfiguracionUsuario? = ConfiguracionUsuario(),
 )
 
 data class ConfiguracionUsuario(
@@ -39,45 +39,48 @@ class UsuarioBuilder {
     }
 
     fun validarUsuarios(usuarios: List<Usuario>): List<List<Validacion>> {
-
-        TODO(
-            """
-            Implementar validación de usuarios usando 'it':
-            - Validar que el nombre no esté vacío
-            - Validar que el email contenga '@'
-            - Validar que tenga al menos un rol
-            Retornar lista de validaciones por cada usuario
-        """,
-        )
+        return usuarios.map {
+            listOf(
+                Validacion(campo = "nombre", mensaje = "El nombre no puede estar vacío", valido = it.nombre.isNotEmpty()),
+                Validacion(campo = "email", mensaje = "El email debe contener @", valido = it.email.contains("@")),
+                Validacion(campo = "roles", mensaje = "El usuario debe tener al menos un rol", valido = it.roles.isNotEmpty())
+            )
+        }
     }
 
     fun procesarTextos(textos: List<String>): List<String> {
-        TODO("Implementar: Limpiar espacios, convertir a minúsculas y filtrar vacíos usando 'it'")
+        return textos.map { it.trim() }
+            .map { it.lowercase() }
+            .filter { it.isNotEmpty() }
     }
 
     // Parte B: Función run
 
     fun calcularNivelAcceso(usuario: Usuario): Int {
-        TODO(
-            """
-            Implementar usando 'run':
-            - Si activo: +10 puntos
-            - Por cada rol: +5 puntos
-            - Si email contiene '@empresa.com': +5 puntos
-        """,
-        )
+        return usuario.run {
+            (if (activo) 10 else 0) + (roles.size * 5) + (if (email.contains("@empresa.com")) 5 else 0)
+        }
+
     }
 
     fun crearUsuarioConTipo(tipo: String): Usuario {
-        TODO(
-            """
-            Implementar usando 'run' para decidir configuración:
-            - Si tipo es "ADMIN": roles=[ADMIN], nivelPrivacidad=3, notificaciones=true
-            - Si tipo es "USER": roles=[USER], nivelPrivacidad=1, notificaciones=false
-            - Otros casos: configuración por defecto
-        """,
-        )
+        val usuarioNuevo = Usuario(
+        roles = mutableListOf(),
+        configuracion = ConfiguracionUsuario(notificaciones = false, nivelPrivacidad = 1)
+    )
+        return usuarioNuevo.run {
+            if (tipo == "ADMIN") {
+                roles = mutableListOf("ADMIN")
+                configuracion.notificaciones = true
+                configuracion.nivelPrivacidad = 3
+            } else if (tipo == "USER") {
+                roles = mutableListOf("USER")
+                configuracion.nivelPrivacidad = 1
+            }
+            this
+        }
     }
+
 
     // Parte C: Función apply
 
@@ -86,22 +89,23 @@ class UsuarioBuilder {
         email: String,
         roles: List<String>,
     ): Usuario {
-        TODO(
-            """
-            Implementar usando 'apply':
-            - Crear usuario y configurar todas sus propiedades
-            - Establecer activo = true
-            - Asignar roles
-            - Crear configuración por defecto
-        """,
-        )
+        return  Usuario(
+            nombre =nombre,
+            email =email,
+            roles = roles.toMutableList(),
+            activo = false
+        ).apply {
+          this.activo = true
+        }
     }
 
     fun actualizarUsuario(
         usuario: Usuario,
         actualizacion: Usuario.() -> Unit,
     ): Usuario {
-        TODO("Implementar: Usar 'apply' para aplicar la función de actualización al usuario")
+        return usuario.apply {
+            actualizacion()
+        }
     }
 
     // Parte D: Función also
@@ -111,15 +115,19 @@ class UsuarioBuilder {
         email: String,
         onLog: (String) -> Unit,
     ): Usuario {
-        TODO(
-            """
-            Implementar usando 'also' para logging:
-            - Crear usuario
-            - Loggear "Usuario creado: [nombre]"
-            - Asignar email y loggear "Email asignado: [email]"
-            - Activar usuario y loggear "Usuario activado"
-        """,
-        )
+        return Usuario(
+            nombre = nombre,
+            roles = mutableListOf(),
+            configuracion = ConfiguracionUsuario(notificaciones = false, nivelPrivacidad = 1)
+        ).also { usuario ->
+            onLog("Usuario creado: ${usuario.nombre}")
+        }.also { usuario ->
+            usuario.email = email
+            onLog("Email asignado: ${usuario.email}")
+        }.also { usuario ->
+            usuario.activo = true
+            onLog("Usuario activado")
+        }
     }
 
     fun crearYValidar(
