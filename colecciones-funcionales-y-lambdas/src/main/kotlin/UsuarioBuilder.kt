@@ -69,19 +69,20 @@ class UsuarioBuilder {
         configuracion = ConfiguracionUsuario(notificaciones = false, nivelPrivacidad = 1)
     )
         return usuarioNuevo.run {
-            if (tipo == "ADMIN") {
-                roles = mutableListOf("ADMIN")
-                configuracion.notificaciones = true
-                configuracion.nivelPrivacidad = 3
-            } else if (tipo == "USER") {
-                roles = mutableListOf("USER")
-                configuracion.nivelPrivacidad = 1
+            when (tipo) {
+                "ADMIN" -> {
+                    roles = mutableListOf("ADMIN")
+                    configuracion.notificaciones = true
+                    configuracion.nivelPrivacidad = 3
+                }
+
+                "USER" -> {
+                    roles = mutableListOf("USER")
+                    configuracion.nivelPrivacidad = 1
+                }
             }
             this
         }
-    }
-
-
     // Parte C: Función apply
 
     fun crearUsuarioCompleto(
@@ -134,75 +135,126 @@ class UsuarioBuilder {
         nombre: String,
         email: String,
     ): Pair<Usuario, Boolean> {
-        TODO(
-            """
-            Implementar usando 'also' para validación:
-            - Crear usuario
-            - Validar que nombre no esté vacío y email contenga '@'
-            - Retornar par (usuario, esValido)
-        """,
-        )
+        var esValido = false
+
+        val usuario = Usuario(
+            nombre = nombre,
+            email = email,
+            roles = mutableListOf(),
+            configuracion = ConfiguracionUsuario(
+                notificaciones = false,
+                nivelPrivacidad = 1
+            )
+        ).also {
+            esValido = nombre.isNotBlank() && email.contains("@")
+        }
+
+        return Pair(usuario, esValido)
+    }
     }
 
     // Parte E: Función let
 
     fun procesarEmailOpcional(email: String?): String {
-        TODO(
-            """
-            Implementar usando 'let':
-            - Si email no es null: "Usuario con email: [email]"
-            - Si email es null: "Usuario sin email"
-        """,
-        )
+        return email?.let {
+            "Usuario con email: $it"
+        } ?: "Usuario sin email"
     }
 
     fun generarMensajesBienvenida(usuarios: List<Usuario>): List<String> {
-        TODO(
-            """
-            Implementar usando 'let':
-            - Solo procesar usuarios activos con email no vacío
-            - Generar mensaje "Bienvenido/a [nombre] ([email])"
-        """,
-        )
+        return usuarios.mapNotNull { usuario ->
+            if (usuario.activo && usuario.email.isNotBlank()) {
+                usuario.email.let {
+                    "Bienvenido/a ${usuario.nombre} ($it)"
+                }
+            } else {
+                null
+            }
+        }
     }
 
     // Parte F: Combinación de Scope Functions
 
     fun procesarUsuarioComplejo(datosBase: Map<String, String>): Usuario? {
-        TODO(
-            """
-            Implementar combinando scope functions:
-            1. Verificar que existan 'nombre' y 'email' (si no, retornar null)
-            2. Crear usuario con 'run'
-            3. Configurar propiedades con 'apply'
-            4. Si departamento es "IT", usar 'also' para configuración especial (tema oscuro, rol IT_USER)
-            5. Retornar usuario configurado
-        """,
-        )
+
+        val nombre = datosBase["nombre"] ?: return null
+        val email = datosBase["email"] ?: return null
+
+        return Usuario(
+            nombre = nombre,
+            email = email,
+            roles = mutableListOf(),
+            configuracion = ConfiguracionUsuario(
+                notificaciones = false,
+                nivelPrivacidad = 1
+            )
+        ).run {
+
+            apply {
+                activo = true
+            }
+
+                .also {
+                    if (datosBase["departamento"] == "IT") {
+                        configuracion.temaOscuro = true
+                        roles.add("IT_USER")
+                    }
+                }
+        }
     }
 
     fun procesarLoteUsuarios(usuarios: List<Usuario>): List<Usuario> {
-        TODO(
-            """
-            Implementar pipeline con scope functions:
-            1. Activar todos los usuarios (apply)
-            2. Asignar rol USER si no tienen roles (also)
-            3. Configurar notificaciones = true (apply)
-            4. Si nombre es "Admin", agregar rol ADMIN y nivelPrivacidad = 3 (run)
-        """,
-        )
+
+        return usuarios.map { usuario ->
+
+            usuario
+                .apply {
+                    activo = true
+                    configuracion.notificaciones = true
+                }
+
+                .also {
+                    if (roles.isEmpty()) {
+                        roles.add("USER")
+                    }
+                }
+
+                .run {
+                    if (nombre == "Admin") {
+                        roles.add("ADMIN")
+                        configuracion.nivelPrivacidad = 3
+                    }
+
+                    this
+                }
+        }
     }
 
     fun parsearYCrearUsuario(datosRaw: String): Usuario? {
-        TODO(
-            """
-            Implementar parsing completo:
-            1. Parsear formato "clave:valor|clave:valor|..."
-            2. Crear usuario con los datos parseados
-            3. Usar scope functions apropiadas para cada transformación
-            4. Retornar null si el formato es inválido
-        """,
-        )
-    }
-}
+        val partes = datosRaw.split("|")
 
+        var nombre = ""
+        var email = ""
+
+        partes.forEach {
+            val dato = it.split(":")
+            if (dato[0] == "nombre") {
+                nombre = dato[1]
+            }
+            if (dato[0] == "email")
+            { email = dato[1]
+                }
+            }
+            return Usuario(
+                nombre = nombre,
+                email = email,
+                roles = mutableListOf(),
+                configuracion = ConfiguracionUsuario(
+                    notificaciones = false,
+                    nivelPrivacidad = 1
+                )
+            ).apply {
+                activo = true
+            }
+        }
+    }
