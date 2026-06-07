@@ -64,25 +64,26 @@ class UsuarioBuilder {
     }
 
     fun crearUsuarioConTipo(tipo: String): Usuario {
-        val usuarioNuevo = Usuario(
-        roles = mutableListOf(),
-        configuracion = ConfiguracionUsuario(notificaciones = false, nivelPrivacidad = 1)
-    )
-        return usuarioNuevo.run {
-            when (tipo) {
+        return Usuario().run {
+            when (tipo.uppercase()) {
                 "ADMIN" -> {
                     roles = mutableListOf("ADMIN")
-                    configuracion.notificaciones = true
-                    configuracion.nivelPrivacidad = 3
+                    configuracion?.nivelPrivacidad = 3
+                    configuracion?.notificaciones = true
                 }
-
                 "USER" -> {
                     roles = mutableListOf("USER")
-                    configuracion.nivelPrivacidad = 1
+                    configuracion?.nivelPrivacidad = 1
+                    configuracion?.notificaciones = false
+                }
+                else -> {
+
                 }
             }
             this
         }
+    }
+
     // Parte C: Función apply
 
     fun crearUsuarioCompleto(
@@ -90,13 +91,12 @@ class UsuarioBuilder {
         email: String,
         roles: List<String>,
     ): Usuario {
-        return  Usuario(
-            nombre =nombre,
-            email =email,
-            roles = roles.toMutableList(),
-            activo = false
-        ).apply {
-          this.activo = true
+        return Usuario().apply {
+            this.nombre = nombre
+            this.email = email
+            this.roles = roles.toMutableList()
+            this.activo = true
+            this.configuracion = ConfiguracionUsuario()
         }
     }
 
@@ -104,9 +104,7 @@ class UsuarioBuilder {
         usuario: Usuario,
         actualizacion: Usuario.() -> Unit,
     ): Usuario {
-        return usuario.apply {
-            actualizacion()
-        }
+        return usuario.apply(actualizacion)
     }
 
     // Parte D: Función also
@@ -116,17 +114,13 @@ class UsuarioBuilder {
         email: String,
         onLog: (String) -> Unit,
     ): Usuario {
-        return Usuario(
-            nombre = nombre,
-            roles = mutableListOf(),
-            configuracion = ConfiguracionUsuario(notificaciones = false, nivelPrivacidad = 1)
-        ).also { usuario ->
-            onLog("Usuario creado: ${usuario.nombre}")
-        }.also { usuario ->
-            usuario.email = email
-            onLog("Email asignado: ${usuario.email}")
-        }.also { usuario ->
-            usuario.activo = true
+        return Usuario(nombre = nombre).also {
+            onLog("Usuario creado: ${it.nombre}")
+        }.also {
+            it.email = email
+            onLog("Email asignado: ${it.email}")
+        }.also {
+            it.activo = true
             onLog("Usuario activado")
         }
     }
@@ -136,125 +130,89 @@ class UsuarioBuilder {
         email: String,
     ): Pair<Usuario, Boolean> {
         var esValido = false
-
-        val usuario = Usuario(
-            nombre = nombre,
-            email = email,
-            roles = mutableListOf(),
-            configuracion = ConfiguracionUsuario(
-                notificaciones = false,
-                nivelPrivacidad = 1
-            )
-        ).also {
-            esValido = nombre.isNotBlank() && email.contains("@")
+        val usuario = Usuario(nombre = nombre, email = email).also {
+            esValido = it.nombre.isNotEmpty() && it.email.contains("@")
         }
-
         return Pair(usuario, esValido)
-    }
     }
 
     // Parte E: Función let
 
     fun procesarEmailOpcional(email: String?): String {
-        return email?.let {
-            "Usuario con email: $it"
-        } ?: "Usuario sin email"
+        return email?.let { "Usuario con email: $it" } ?: "Usuario sin email"
     }
 
     fun generarMensajesBienvenida(usuarios: List<Usuario>): List<String> {
-        return usuarios.mapNotNull { usuario ->
-            if (usuario.activo && usuario.email.isNotBlank()) {
-                usuario.email.let {
-                    "Bienvenido/a ${usuario.nombre} ($it)"
-                }
-            } else {
-                null
+        return usuarios.filter { it.activo && it.email.isNotEmpty() }
+            .map { u ->
+                u.email.let { "Bienvenido/a ${u.nombre} ($it)" }
             }
-        }
     }
 
     // Parte F: Combinación de Scope Functions
 
     fun procesarUsuarioComplejo(datosBase: Map<String, String>): Usuario? {
+        val nombre = datosBase["nombre"]
+        val email = datosBase["email"]
 
-        val nombre = datosBase["nombre"] ?: return null
-        val email = datosBase["email"] ?: return null
+        if (nombre == null || email == null) return null
 
-        return Usuario(
-            nombre = nombre,
-            email = email,
-            roles = mutableListOf(),
-            configuracion = ConfiguracionUsuario(
-                notificaciones = false,
-                nivelPrivacidad = 1
-            )
-        ).run {
-
-            apply {
-                activo = true
+        return Usuario().run {
+            this.nombre = nombre
+            this.email = email
+            this
+        }.apply {
+            configuracion = ConfiguracionUsuario()
+        }.also {
+            if (datosBase["departamento"] == "IT") {
+                it.configuracion?.tema = "oscuro"
+                it.roles.add("IT_USER")
             }
-
-                .also {
-                    if (datosBase["departamento"] == "IT") {
-                        configuracion.temaOscuro = true
-                        roles.add("IT_USER")
-                    }
-                }
         }
     }
 
     fun procesarLoteUsuarios(usuarios: List<Usuario>): List<Usuario> {
-
-        return usuarios.map { usuario ->
-
-            usuario
-                .apply {
-                    activo = true
-                    configuracion.notificaciones = true
+        return usuarios.map { u ->
+            u.apply {
+                activo = true
+                configuracion?.notificaciones = true
+            }.also {
+                if (it.roles.isEmpty()) it.roles.add("USER")
+            }.run {
+                if (nombre == "Admin") {
+                    roles.add("ADMIN")
+                    configuracion?.nivelPrivacidad = 3
                 }
-
-                .also {
-                    if (roles.isEmpty()) {
-                        roles.add("USER")
-                    }
-                }
-
-                .run {
-                    if (nombre == "Admin") {
-                        roles.add("ADMIN")
-                        configuracion.nivelPrivacidad = 3
-                    }
-
-                    this
-                }
+                this
+            }
         }
     }
 
     fun parsearYCrearUsuario(datosRaw: String): Usuario? {
-        val partes = datosRaw.split("|")
+        val partes = datosRaw.split("|").map { it.trim() }
+        if (partes.isEmpty()) return null
 
-        var nombre = ""
-        var email = ""
+        val mapa = partes.mapNotNull {
+            val kv = it.split(":").map { s -> s.trim() }
+            if (kv.size == 2 && kv[0].isNotEmpty()) kv[0] to kv[1] else null
+        }.toMap()
 
-        partes.forEach {
-            val dato = it.split(":")
-            if (dato[0] == "nombre") {
-                nombre = dato[1]
-            }
-            if (dato[0] == "email")
-            { email = dato[1]
-                }
-            }
-            return Usuario(
-                nombre = nombre,
-                email = email,
-                roles = mutableListOf(),
-                configuracion = ConfiguracionUsuario(
-                    notificaciones = false,
-                    nivelPrivacidad = 1
-                )
-            ).apply {
-                activo = true
+        val id = mapa["id"]?.toIntOrNull()
+        val nombre = mapa["nombre"]
+        val email = mapa["email"]
+
+        if (id == null || nombre.isNullOrEmpty() || email.isNullOrEmpty()) return null
+
+        return Usuario().apply {
+            this.id = id
+            this.nombre = nombre
+            this.email = email
+            this.activo = mapa["activo"]?.lowercase() == "true"
+            this.roles = mapa["roles"]?.split(",")?.map { it.trim() }?.toMutableList() ?: mutableListOf("USER")
+            this.configuracion = ConfiguracionUsuario().apply {
+                tema = mapa["tema"] ?: "claro"
+                idioma = mapa["idioma"] ?: "es"
             }
         }
     }
+}
