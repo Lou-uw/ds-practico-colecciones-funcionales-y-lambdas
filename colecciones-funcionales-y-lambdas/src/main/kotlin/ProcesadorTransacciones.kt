@@ -68,16 +68,10 @@ class ProcesadorTransacciones {
         valorInicial: T,
         agregador: (T, Transaccion) -> T,
     ): T {
-
-        var agrega = valorInicial
-
-        for (transaccion in transacciones) {
-            agrega = agregador(agrega, transaccion)
+        return transacciones.fold(initial=valorInicial) {acumulador, transaccion ->
+            agregador(acumulador,transaccion)
         }
-
-        return agrega
     }
-
     // Parte D: Composición de Funciones
 
     fun ejecutarPipeline(
