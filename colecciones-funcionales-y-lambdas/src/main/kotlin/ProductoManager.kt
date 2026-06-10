@@ -7,6 +7,7 @@
  * IMPORTANTE: No modifiques la firma de los métodos, solo implementa su lógica.
  */
 
+
 data class Producto(
     val id: Int,
     val nombre: String,

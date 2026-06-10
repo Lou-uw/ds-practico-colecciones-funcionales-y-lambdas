@@ -188,6 +188,7 @@ class UsuarioBuilder {
         }
     }
 
+
     fun parsearYCrearUsuario(datosRaw: String): Usuario? {
         val partes = datosRaw.split("|").map { it.trim() }
         if (partes.isEmpty()) return null

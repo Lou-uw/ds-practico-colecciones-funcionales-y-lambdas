@@ -93,6 +93,7 @@ class ProcesadorTransacciones {
             .fold(0.0, agregacion)
     }
 
+
     fun procesarConConfiguracion(
         transacciones: List<Transaccion>,
         config: ConfiguracionProcesamiento,
