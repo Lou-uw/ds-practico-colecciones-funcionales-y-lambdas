@@ -14,7 +14,7 @@ data class Usuario(
     var email: String = "",
     var activo: Boolean = false,
     var roles: MutableList<String> = mutableListOf(),
-    var configuracion: ConfiguracionUsuario? = ConfiguracionUsuario(),
+    var configuracion: ConfiguracionUsuario = ConfiguracionUsuario(),
 )
 
 data class ConfiguracionUsuario(
@@ -68,13 +68,13 @@ class UsuarioBuilder {
             when (tipo.uppercase()) {
                 "ADMIN" -> {
                     roles = mutableListOf("ADMIN")
-                    configuracion?.nivelPrivacidad = 3
-                    configuracion?.notificaciones = true
+                    configuracion.nivelPrivacidad = 3
+                    configuracion.notificaciones = true
                 }
                 "USER" -> {
                     roles = mutableListOf("USER")
-                    configuracion?.nivelPrivacidad = 1
-                    configuracion?.notificaciones = false
+                    configuracion.nivelPrivacidad = 1
+                    configuracion.notificaciones = false
                 }
                 else -> {
 
